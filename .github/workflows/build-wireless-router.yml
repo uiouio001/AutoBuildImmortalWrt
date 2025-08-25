@@ -147,7 +147,7 @@ jobs:
           profile="${{ github.event.inputs.profile }}"
           echo "Building for profile: $profile"
           include_docker="${{ github.event.inputs.include_docker }}"
-          # 默认平台
+          # 默认平台USE_NX30PRO_EEPROM
           echo "platform=mediatek/filogic" >> $GITHUB_ENV
 
           # 读取 ipq807x 机型文件
