@@ -119,51 +119,10 @@ fi
 ###############################################################
 if [ "$USE_NX30PRO_EEPROM" == "default" ]; then
   echo "✅ 使用nx30pro的高功率eeprom"
-  # 修复 EEPROM 文件冲突 (使用 kmod-mt_wifi 的 EEPROM)
-  if [ -f "target/linux/mediatek/mt7981/base-files/lib/firmware/MT7981_iPAiLNA_EEPROM.bin" ]; then
-    echo "移除 base-files 中的 EEPROM 文件以避免冲突"
-    rm -f target/linux/mediatek/mt7981/base-files/lib/firmware/MT7981_iPAiLNA_EEPROM.bin
-  fi
-  # 恢复原始的 EEPROM 提取代码
-  if [ -f "target/linux/mediatek/mt7981/base-files/lib/preinit/90_extract_caldata" ]; then
-    sed -i 's/# caldata_extract_mmc/caldata_extract_mmc/' target/linux/mediatek/mt7981/base-files/lib/preinit/90_extract_caldata
-  fi
-  # 确保 kmod-mt_wifi 中的 EEPROM 安装代码存在
-  if [ -f "package/mtk/drivers/mt_wifi/Makefile" ]; then
-    if ! grep -q "MT7981_iPAiLNA_EEPROM\.bin" package/mtk/drivers/mt_wifi/Makefile; then
-      echo "恢复 kmod-mt_wifi 中的 EEPROM 安装代码"
-              
-      # 备份原始 Makefile
-      cp package/mtk/drivers/mt_wifi/Makefile package/mtk/drivers/mt_wifi/Makefile.backup
-              
-      # 添加 EEPROM 安装代码
-      if grep -q "define Package/.*/install" package/mtk/drivers/mt_wifi/Makefile; then
-        sed -i '/define Package\/\$(PKG_NAME)\/install/a\\t$(INSTALL_DIR) $(1)/lib/firmware\n\t$(INSTALL_DATA) ./files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin $(1)/lib/firmware/' package/mtk/drivers/mt_wifi/Makefile
-      else
-        cat >> package/mtk/drivers/mt_wifi/Makefile << 'EOF'
-
-  define Package/$(PKG_NAME)/install
-    $(INSTALL_DIR) $(1)/lib/firmware
-    $(INSTALL_DATA) ./files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin $(1)/lib/firmware/
-  endef
-  EOF
-      fi
-    fi
-  fi
-  # 确保 EEPROM 文件存在
-  if [ ! -f "package/mtk/drivers/mt_wifi/files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin" ]; then
-    echo "创建 EEPROM 文件目录"
-    mkdir -p package/mtk/drivers/mt_wifi/files/mt7981-default-eeprom
-          
-    # 使用 NX30Pro 的 EEPROM（如果启用）
-    if [ "$USE_NX30PRO_EEPROM" = "true" ] && [ -f "eeprom/nx30pro_eeprom.bin" ]; then
-      echo "使用 NX30Pro 的 EEPROM 文件"
-      cp mediatek-filogic/eeprom/nx30pro_eeprom.bin package/mtk/drivers/mt_wifi/files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin
-    else
-      echo "使用默认的 EEPROM 文件（需要后续从设备提取）"
-      touch package/mtk/drivers/mt_wifi/files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin
-    fi
-  fi
+  mkdir target/linux/mediatek/mt7981/base-files/lib/firmware
+  cp mediatek-filogic/eeprom/nx30pro_eeprom.bin target/linux/mediatek/mt7981/base-files/lib/firmware/MT7981_iPAiLNA_EEPROM.bin
+  sed -i 's/caldata_extract_mmc/# caldata_extract_mmc/' target/linux/mediatek/mt7981/base-files/lib/preinit/90_extract_caldata
+  sed -i 's#./files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin##' package/mtk/drivers/mt_wifi/Makefile
 
 fi
 ###############################################################
