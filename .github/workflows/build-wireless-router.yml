@@ -25,7 +25,7 @@ on:
         description: "请选择mtk路由器型号"
         required: true
         options:
-          - cmcc_rax3000m-emmc
+          - cmcc_rax3000m
           - cmcc_rax3000m-emmc-ubootmod
           - cmcc_rax3000m-nand-ubootmod
           - cmcc_rax3000m
