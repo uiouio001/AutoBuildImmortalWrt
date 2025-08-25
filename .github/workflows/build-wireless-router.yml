@@ -22,7 +22,7 @@ on:
     inputs:
       profile:
         type: choice
-        description: '请选择mtk路由器型号'
+        description: "请选择mtk路由器型号"
         required: true
         options:
           - glinet_gl-mt2500
@@ -358,7 +358,7 @@ on:
           - rostelecom_rt-fe-1a
           - rostelecom_rt-sf-1
           - ruijie_rg-ew1200g-pro-v1.1
-          - samknows_whitebox-v8
+          - samknows_white''box-v8
           - sercomm_na502
           - sercomm_na502s
           - sim_simax1800t
@@ -485,26 +485,26 @@ on:
           - tenda_ac9
         default: cmcc_rax3000m-emmc-ubootmod
       custom_router_ip:
-        description: '请设置路由器的管理地址 格式:192.168.x.1 或 10.x.x.1'
+        description: "请设置路由器的管理地址 格式:192.168.x.1 或 10.x.x.1"
         required: true
         default: "192.168.6.1"
       enable_store:
-        description: '集成 store 商店'
+        description: "集成 iStore 商店"
         required: false
         type: boolean
         default: true
       include_docker:
-        description: '是否编译 Docker 插件'
+        description: "是否编译 Dockerman 插件"
         required: true
         default: true
         type: boolean
       USE_XR30_LED_DTS:
-        description: 'Use xr30 led dts'
+        description: "Use xr30 led dts"
         required: true
         default: false
         type: boolean
       WIFI_DRIVER_VERSION:
-        description: '选择WiFi驱动版本'
+        description: "选择WiFi驱动版本"
         required: true
         default: 'v7.6.7.2-fw-20240823(recommend)'
         type: choice
@@ -524,20 +524,20 @@ on:
         - v7.6.6.1-fw-20231024
         - v7.6.6.1-fw-20240823
       USE_NX30PRO_EEPROM:
-        description: '使用nx30pro高功能eeprom提高信号强度'
+        description: "使用nx30pro高功能eeprom提高信号强度"
         required: true
         default: false
         type: boolean
       enable_pppoe:
-        description: '是否配置PPPoE拨号信息?'
+        description: "是否配置PPPoE拨号信息?"
         required: true
         default: false
         type: boolean
       pppoe_account:
-        description: '宽带账号 (若启用PPPoE)'
+        description: "宽带账号 (若启用PPPoE)"
         required: false
       pppoe_password:
-        description: '宽带密码 (若启用PPPoE)'
+        description: "宽带密码 (若启用PPPoE)"
         required: false
 
 
