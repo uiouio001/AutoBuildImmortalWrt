@@ -699,7 +699,6 @@ jobs:
             immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
       
       - name: Create info
-        id:
         run: |
           cat > ${{ github.workspace }}/router-info.md <<EOF
           ## 📡 路由器后台信息
