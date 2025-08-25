@@ -701,7 +701,9 @@ jobs:
               -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
               -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
             immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
+      
       - name: Create info
+        id:
         run: |
           cat > ${{ github.workspace }}/router-info.md <<EOF
           ## 📡 路由器后台信息
@@ -718,11 +720,12 @@ jobs:
             echo -e "\n#### 不带docker" >> ${{ github.workspace }}/router-info.md
           fi
           
+          echo "release_tag=${{ github.event.inputs.profile }}-$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
           
       - name: Upload ImmortalWrt as release assets
         uses: softprops/action-gh-release@v2.2.1
         with:
-          tag_name: ${{ github.event.inputs.profile }}
+          tag_name: ${{ env.release_tag }}
           name: ImmortalWrt-Wireless
           body_path: ${{ github.workspace }}/router-info.md
           files: |
