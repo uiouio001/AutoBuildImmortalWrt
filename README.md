@@ -57,7 +57,7 @@ https://www.youtube.com/watch?v=7i6BQeitUtE
 
 
 ## ❤️如何构建docker版ImmortalWrt（建议收藏）⬇️
-https://wkdaily.cpolar.cn/15
+- https://wkdaily.cpolar.cn/15
 # 🌟鸣谢
 ### https://github.com/immortalwrt
 ### https://github.com/ophub/flippy-openwrt-actions
