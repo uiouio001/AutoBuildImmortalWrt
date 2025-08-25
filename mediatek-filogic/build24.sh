@@ -2,30 +2,30 @@
 source shell/custom-packages.sh
 # 该文件实际为imagebuilder容器内的build.sh
 
-#echo "✅ 你选择了第三方软件包：$CUSTOM_PACKAGES"
-# 下载 run 文件仓库
-echo "🔄 正在同步第三方软件仓库 Cloning run file repo..."
-git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
-
-# 拷贝 run/arm64 下所有 run 文件和ipk文件 到 extra-packages 目录
-mkdir -p /home/build/immortalwrt/extra-packages
-cp -r /tmp/store-run-repo/run/arm64/* /home/build/immortalwrt/extra-packages/
-
-echo "✅ Run files copied to extra-packages:"
-ls -lh /home/build/immortalwrt/extra-packages/*.run
-# 解压并拷贝ipk到packages目录
-sh shell/prepare-packages.sh
-ls -lah /home/build/immortalwrt/packages/
-# 添加架构优先级信息
-sed -i '1i\
-arch aarch64_generic 10\n\
-arch aarch64_cortex-a53 15' repositories.conf
-
-
-
+if [ -n "$CUSTOM_PACKAGES" ]; then
+  echo "✅ 你选择了第三方软件包：$CUSTOM_PACKAGES"
+    # 下载 run 文件仓库
+    echo "🔄 正在同步第三方软件仓库 Cloning run file repo..."
+    git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+    
+    # 拷贝 run/arm64 下所有 run 文件和ipk文件 到 extra-packages 目录
+    mkdir -p /home/build/immortalwrt/extra-packages
+    cp -r /tmp/store-run-repo/run/arm64/* /home/build/immortalwrt/extra-packages/
+    
+    echo "✅ Run files copied to extra-packages:"
+    ls -lh /home/build/immortalwrt/extra-packages/*.run
+    # 解压并拷贝ipk到packages目录
+    sh shell/prepare-packages.sh
+    ls -lah /home/build/immortalwrt/packages/
+    # 添加架构优先级信息
+    sed -i '1i\
+    arch aarch64_generic 10\n\
+    arch aarch64_cortex-a53 15' repositories.conf
+else
+  echo "⚪️ 未选择任何第三方软件包"
+fi
 # yml 传入的路由器型号 PROFILE
 echo "Building for profile: $PROFILE"
-
 echo "Include Docker: $INCLUDE_DOCKER"
 echo "Create pppoe-settings"
 mkdir -p  /home/build/immortalwrt/files/etc/config
@@ -60,6 +60,12 @@ PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
 # 静态文件服务器dufs(推荐)
 PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
+# OpenClash
+PACKAGES="$PACKAGES luci-app-openclash luci-i18n-openclash-zh-cn"
+# 增加几个必备组件 方便用户安装iStore
+PACKAGES="$PACKAGES fdisk"
+PACKAGES="$PACKAGES script-utils"
+PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
 
 # 第三方软件包 合并
 # ======== shell/custom-packages.sh =======
@@ -89,9 +95,40 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     # Download GeoIP and GeoSite
     wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat
     wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat
+    # Download China IP data
+    wget -q https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country.mmdb -O > files/etc/openclash/Country.mmdb
 else
     echo "⚪️ 未选择 luci-app-openclash"
 fi
+
+# 判断是否使用XR30 Led配置文件
+if [ "$USE_XR30_LED_DTS" = "true" ]; then
+    cp mediatek-filogic/dtsi/mt7981-cmcc-xr30-emmc.dtsi target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m.dtsi
+    echo "✅ 使用XR30 Led配置文件"
+fi
+
+
+# 设置WiFi驱动版本，默认为v7.6.6.2
+if [ "$WIFI_DRIVER_VERSION" == "v7.6.6.1" ]; then
+  sed -i 's/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7672=y/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7661=y/g' .config
+fi
+if [ "$WIFI_DRIVER_FIRMWARE" == "default" ]; then
+  sed -i 's/CONFIG_MTK_MT_WIFI_MT7981_20240823=y/CONFIG_MTK_MT_WIFI_MT7981_DEFAULT_FIRMWARE=y/g' .config
+else
+  sed -i 's/CONFIG_MTK_MT_WIFI_MT7981_20240823=y/CONFIG_MTK_MT_WIFI_MT7981_${firmware}=y/g' .config
+fi
+
+
+###############################################################
+if [ "$USE_NX30PRO_EEPROM" == "default" ]; then
+  echo "✅ 使用nx30pro的高功率eeprom"
+  mkdir target/linux/mediatek/mt7981/base-files/lib/firmware
+  cp mediatek-filogic/eeprom/nx30pro_eeprom.bin target/linux/mediatek/mt7981/base-files/lib/firmware/MT7981_iPAiLNA_EEPROM.bin
+  sed -i 's/caldata_extract_mmc/# caldata_extract_mmc/' target/linux/mediatek/mt7981/base-files/lib/preinit/90_extract_caldata
+  sed -i 's#./files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin##' package/mtk/drivers/mt_wifi/Makefile
+
+fi
+###############################################################
 
 
 # 构建镜像
