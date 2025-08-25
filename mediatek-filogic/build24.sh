@@ -61,7 +61,7 @@ PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
 # 静态文件服务器dufs(推荐)
 PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
 # OpenClash
-PACKAGES="$PACKAGES luci-app-openclash luci-i18n-openclash-zh-cn"
+PACKAGES="$PACKAGES luci-app-openclash"
 # 增加几个必备组件 方便用户安装iStore
 PACKAGES="$PACKAGES fdisk"
 PACKAGES="$PACKAGES script-utils"
