@@ -76,7 +76,7 @@ PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 # 判断是否需要编译 Docker 插件
-if [ "$INCLUDE_DOCKER" = "yes" ]; then
+if [ "$INCLUDE_DOCKER" = "true" ]; then
     PACKAGES="$PACKAGES luci-i18n-dockerman-zh-cn"
     echo "Adding package: luci-i18n-dockerman-zh-cn"
 fi
@@ -99,7 +99,7 @@ else
 fi
 
 # 判断是否使用XR30 Led配置文件
-if [ "$USE_XR30_LED_DTS" = "yes" ]; then
+if [ "$USE_XR30_LED_DTS" = "true" ]; then
     cp mediatek-filogic/dtsi/mt7981-cmcc-xr30-emmc.dtsi target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m.dtsi
     echo "✅ 使用XR30 Led配置文件"
 fi

@@ -497,11 +497,8 @@ on:
         description: |
           是否编译 Docker 插件
         required: true
-        default: 'yes'
-        type: choice
-        options:
-          - 'yes'
-          - 'no'
+        default: true
+        type: boolean
       USE_XR30_LED_DTS:
         description: 'Use xr30 led dts'
         required: true
@@ -713,7 +710,7 @@ jobs:
           - 🔑 **密码**: 无
           EOF
 
-          if [ "${{ github.event.inputs.include_docker }}" == "yes" ]; then
+          if [ "${{ github.event.inputs.include_docker }}" == "true" ]; then
             extra_content="#### 默认带docker"
             echo -e "\n$extra_content" >> ${{ github.workspace }}/router-info.md
           else
