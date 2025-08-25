@@ -1,7 +1,9 @@
 #!/bin/sh
 # 该脚本为immortalwrt首次启动时 运行的脚本 即 /etc/uci-defaults/99-custom.sh 也就是说该文件在路由器内 重启后消失 只运行一次
-# 设置默认防火墙规则，方便虚拟机首次访问 WebUI
+# Log file for debugging
 LOGFILE="/etc/config/uci-defaults-log.txt"
+echo "Starting 99-custom.sh at $(date)" >>$LOGFILE
+# 设置默认防火墙规则，方便虚拟机首次访问 WebUI
 uci set firewall.@zone[1].input='ACCEPT'
 
 # 设置主机名映射，解决安卓原生 TV 无法联网的问题
@@ -101,8 +103,22 @@ uci set dropbear.@dropbear[0].Interface=''
 uci commit
 
 # 设置编译作者信息
-FILE_PATH="/etc/openwrt_release"
-NEW_DESCRIPTION="Packaged by wukongdaily"
-sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
+#FILE_PATH="/etc/openwrt_release"
+#NEW_DESCRIPTION="Packaged by wukongdaily"
+#sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
+
+# 若luci-app-advancedplus (进阶设置)已安装 则去除zsh的调用 防止命令行报 /usb/bin/zsh: not found的提示
+if opkg list-installed | grep -q '^luci-app-advancedplus '; then
+    sed -i '/custom\/usr\/bin\/zsh/d' /etc/profile
+    sed -i '/\/bin\/zsh/d' /etc/init.d/advancedplus
+    sed -i '/\/usr\/bin\/zsh/d' /etc/init.d/advancedplus
+fi
+
+# 设置时区
+echo "✅ Set Timezone: Asia\/Shanghai"
+sed -i "s/'UTC'/'CST-8'\n   set system.@system[-1].zonename='Asia\/Shanghai'/g" package/base-files/files/bin/config_generate
+sed -i 's/time1\.apple\.com/ntp\.ntsc\.ac\.cn/g' package/base-files/files/bin/config_generate
+sed -i 's/time1\.google\.com/ntp\.tencent\.com/g' package/base-files/files/bin/config_generate
+sed -i 's/time\.cloudflare\.com/ntp1\.aliyun\.com/g' package/base-files/files/bin/config_generate
 
 exit 0

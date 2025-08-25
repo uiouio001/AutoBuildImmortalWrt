@@ -90,9 +90,9 @@ jobs:
             docker run --rm -i \
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
-              -v "${{ github.workspace }}/files:/home/build/immortalwrt/files" \
-              -v "${{ github.workspace }}/custom:/home/build/immortalwrt/files/etc/config" \
-              -v "${{ github.workspace }}/x86-64/imm.config:/home/build/immortalwrt/.config" \
+              -v "${{ github.workspace }}/x86-64/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
+              -v "${{ github.workspace }}/x86-64/files/etc/config:/home/build/immortalwrt/files/etc/config" \
+              -v "${{ github.workspace }}/x86-64/.config:/home/build/immortalwrt/.config" \
               -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
               -v "${{ github.workspace }}/x86-64/build23.sh:/home/build/immortalwrt/build.sh" \
               -e PROFILE=$profile \

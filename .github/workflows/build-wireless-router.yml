@@ -502,14 +502,41 @@ on:
         options:
           - 'yes'
           - 'no'
+      USE_XR30_LED_DTS:
+        description: 'Use xr30 led dts'
+        required: true
+        default: false
+        type: boolean
+      WIFI_DRIVER_VERSION:
+        description: '选择WiFi驱动版本'
+        required: true
+        default: 'v7.6.7.2-fw-20240823(recommend)'
+        type: choice
+        options:
+        - v7.6.7.2-fw-20240823(recommend)
+        - v7.6.6.1-fw-20230306(recommend)
+        - v7.6.7.2-fw-default
+        - v7.6.7.2-fw-20230306
+        - v7.6.7.2-fw-20230330
+        - v7.6.7.2-fw-20230411
+        - v7.6.7.2-fw-20230717
+        - v7.6.7.2-fw-20231024
+        - v7.6.6.1-fw-default
+        - v7.6.6.1-fw-20230330
+        - v7.6.6.1-fw-20230411
+        - v7.6.6.1-fw-20230717
+        - v7.6.6.1-fw-20231024
+        - v7.6.6.1-fw-20240823
+      USE_NX30PRO_EEPROM:
+        description: '使用nx30pro高功能eeprom提高信号强度'
+        required: true
+        default: false
+        type: boolean
       enable_pppoe:
         description: "是否配置PPPoE拨号信息?"
         required: true
-        default: 'no'
-        type: choice
-        options:
-          - 'yes'
-          - 'no'
+        default: false
+        type: boolean
       pppoe_account:
         description: "宽带账号 (若启用PPPoE)"
         required: false
@@ -540,8 +567,8 @@ jobs:
 
       - name: Validate PPPoE Inputs
         run: |
-          if [[ "${{ inputs.enable_pppoe }}" == "yes" ]]; then
-            if [[ -z "${{ inputs.pppoe_account }}" || -z "${{ inputs.pppoe_password }}" ]]; then
+          if [[ "${{ github.event.inputs.enable_pppoe }}" == "true" ]]; then
+            if [[ -z "${{ github.event.inputs.pppoe_account }}" || -z "${{ github.event.inputs.pppoe_password }}" ]]; then
               echo "Error: PPPoE account and password must be provided when PPPoE is enabled!"
               exit 1
             fi
@@ -555,8 +582,31 @@ jobs:
           else
             echo "❎ 未启用 luci-app-store"
           fi
-
-
+      
+      - name: Set Use XR30 Led配置文件
+        run: |
+          if [ "${{ github.event.inputs.USE_XR30_LED_DTS }}" == "true" ]; then
+            echo "✅ 设置使用XR30的Led配置文件"
+          else
+            echo "⚪️ 设置使用默认的Led配置文件"
+          fi
+      
+      - name: Set WiFi Driver Version
+        run: |
+          driver_version=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          driver_firmware=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/.*fw-([0-9]{8}|default).*/\1/g')
+          echo "wifi_driver_version=$driver_version" >> $GITHUB_ENV
+          echo "wifi_driver_firmware=$driver_firmware" >> $GITHUB_ENV
+          echo "✅ 您选择的WiFi驱动版本是: $driver_version-fw-$driver_firmware"
+ 
+      - name: Use nx30pro eeprom and fixed WiFi MAC address
+        run: |
+          if [ "${{ github.event.inputs.USE_NX30PRO_EEPROM }}" == "true" ]; then
+            echo "✅ 使用nx30pro的高功率eeprom(2.4G是23dBm、5G是22dBm)"
+          else
+            echo "❎ 使用默认功率eeprom(2.4G是25dBm、5G是24dBm)"
+          fi
+      
       - name: Build Wireless ImmortalWrt 24.10.2
         run: |
           profile="${{ github.event.inputs.profile }}"
@@ -566,7 +616,7 @@ jobs:
           echo "platform=mediatek/filogic" >> $GITHUB_ENV
 
           # 读取 ipq807x 机型文件
-          ipq807x_models=$(cat model/ipq807x.txt | tr '\n' '|')
+          ipq807x_models=$(cat mediatek-filogic/model/ipq807x.txt | tr '\n' '|')
           ipq807x_models=${ipq807x_models%|}
           if [[ "$profile" =~ ^($ipq807x_models)$ ]]; then
               case_tag="qualcommax-ipq807x-openwrt-24.10.2"
@@ -574,7 +624,7 @@ jobs:
           fi
 
           # 读取 mt7621 机型文件
-          mt7621_models=$(cat model/mt7621.txt | tr '\n' '|')
+          mt7621_models=$(cat mediatek-filogic/model/mt7621.txt | tr '\n' '|')
           mt7621_models=${mt7621_models%|}
           if [[ "$profile" =~ ^($mt7621_models)$ ]]; then
               case_tag="ramips-mt7621-openwrt-24.10.2"
@@ -582,7 +632,7 @@ jobs:
           fi
 
           # 读取 bcm53xx/generic 机型文件
-          bcm53xx_models=$(cat model/bcm53xx.txt | tr '\n' '|')
+          bcm53xx_models=$(cat mediatek-filogic/model/bcm53xx.txt | tr '\n' '|')
           bcm53xx_models=${bcm53xx_models%|}
           if [[ "$profile" =~ ^($bcm53xx_models)$ ]]; then
               case_tag="bcm53xx-generic-openwrt-24.10.2"
@@ -636,30 +686,37 @@ jobs:
             docker run --rm -i \
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
-              -v "${{ github.workspace }}/glinet:/home/build/immortalwrt/files/etc/uci-defaults" \
-              -v "${{ github.workspace }}/custom:/home/build/immortalwrt/files/etc/config" \
+              -v "${{ github.workspace }}/mediatek-filogic/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
+              -v "${{ github.workspace }}/mediatek-filogic/files/etc/config:/home/build/immortalwrt/files/etc/config" \
               -v "${{ github.workspace }}/arch/arch.conf:/home/build/immortalwrt/files/etc/opkg/arch.conf" \
               -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
               -v "${{ github.workspace }}/mediatek-filogic/build24.sh:/home/build/immortalwrt/build.sh" \
               -e PROFILE=$profile \
               -e INCLUDE_DOCKER=$include_docker \
-              -e ENABLE_PPPOE=${{ inputs.enable_pppoe }} \
-              -e PPPOE_ACCOUNT=${{ inputs.pppoe_account }} \
-              -e PPPOE_PASSWORD=${{ inputs.pppoe_password }} \
+              -e USE_XR30_LED_DTS=${{ github.event.inputs.USE_XR30_LED_DTS }} \
+              -e WIFI_DRIVER_VERSION=${{ env.wifi_driver_version }} \
+              -e WIFI_DRIVER_FIRMWARE=${{ env.wifi_driver_firmware }} \
+              -e USE_NX30PRO_EEPROM=${{ github.event.inputs.USE_NX30PRO_EEPROM }} \
+              -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
+              -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
+              -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
             immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
-          
-
       - name: Create info
         run: |
+          cat > ${{ github.workspace }}/router-info.md <<EOF
+          ## 📡 路由器后台信息
+
+          - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}
+          - 👤 **用户名**: root
+          - 🔑 **密码**: 无
+          EOF
+
           if [ "${{ github.event.inputs.include_docker }}" == "yes" ]; then
-            extra_content="### 默认带docker"
-            echo -e "\n $extra_content" >> ${{ github.workspace }}/mediatek-filogic/info.md
+            extra_content="#### 默认带docker"
+            echo -e "\n$extra_content" >> ${{ github.workspace }}/router-info.md
           else
-            echo -e "NO docker"
+            echo -e "\n#### 不带docker" >> ${{ github.workspace }}/router-info.md
           fi
-          custom_router_ip="${{ github.event.inputs.custom_router_ip }}"
-          extra_content_ip="#### 管理地址 $custom_router_ip"
-          echo -e "\n $extra_content_ip" >> ${{ github.workspace }}/mediatek-filogic/info.md
           
           
       - name: Upload ImmortalWrt as release assets
@@ -667,7 +724,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.profile }}
           name: ImmortalWrt-Wireless
-          body_path: ${{ github.workspace }}/mediatek-filogic/info.md
+          body_path: ${{ github.workspace }}/router-info.md
           files: |
             ${{ github.workspace }}/bin/targets/${{ env.platform }}/*
           token: ${{ secrets.GITHUB_TOKEN }}
