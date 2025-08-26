@@ -62,6 +62,11 @@ on:
         required: true
         default: false
         type: boolean
+      SSH_TO_GITHUB_ACTIONS:
+        description: 'SSH connection to Actions'
+        required: false
+        default: false
+        type: boolean
       enable_pppoe:
         description: "是否配置PPPoE拨号信息?"
         required: true
@@ -184,10 +189,22 @@ jobs:
           echo "build_date=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
 
-      - name: View disk usage
-        if: (!cancelled())
-        run: |
-          df -hT
+      - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
+        if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
+        uses: alan6288/ssh2actions@main
+        with:
+          mode: ngrok
+        env:
+          # After sign up on the https://ngrok.com
+          # You can find this token here: https://dashboard.ngrok.com/auth/your-authtoken
+          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+          
+          # ngrok server region [us, eu, au, ap, sa, jp, in] (optional, default: us)
+          # You can find this server region here: https://ngrok.com/docs#global-locations
+          NGROK_REGION: us
+      
+          # This password you will use when authorizing via SSH
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       
       - name: Organize firmware files
         id: organize
