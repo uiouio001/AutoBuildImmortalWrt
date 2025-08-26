@@ -69,6 +69,7 @@ jobs:
 
       - name: Set executable permissions
         run: |
+          sudo chown $USER:$GROUPS ${{ github.workspace }}
           chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
       
       - name: Save Custom Router IP into OpenWrt files
@@ -77,7 +78,6 @@ jobs:
           echo "${{ github.event.inputs.custom_router_ip }}" > "${{ github.workspace }}/custom/custom_router_ip.txt"
           echo "您设置的路由器管理地址是:${{ github.event.inputs.custom_router_ip }}"
           # 后续步骤会将该文件映射到路由器/etc/config/custom_router_ip.txt 以便用于开机脚本99-custom.sh读取用户设置的ip
-
 
       - name: Validate PPPoE Inputs
         if: github.event.inputs.enable_pppoe == 'true'
@@ -165,8 +165,7 @@ jobs:
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          #cd /home/build/immortalwrt/bin/targets/*/*
-          #cd ${{ github.workspace }}/bin/targets/${{ env.platform }}/*
+          sudo chown $USER:$GROUPS ${{ github.workspace }}/bin/targets
           cd ${{ github.workspace }}/bin/targets/*/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
@@ -202,7 +201,7 @@ jobs:
                   echo "- ⚪️ 未构建Docker" >> release.txt
           fi
 
-          echo "release_tag=${{ github.event.inputs.profile }}-$release_date" >> $GITHUB_OUTPUT
+          echo "release_tag=${{ github.event.inputs.profile }}-${{ env.build_date }}" >> $GITHUB_OUTPUT
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Upload ImmortalWrt as release assets
