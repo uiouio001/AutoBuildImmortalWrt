@@ -91,6 +91,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      actions: write
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -196,7 +200,7 @@ jobs:
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
           mapfile -t devices < <(grep '^CONFIG_TARGET_DEVICE.*=y' openwrt/.config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-          cd ${{ github.workspace }}/bin/targets//*/*
+          cd ${{ github.workspace }}/bin/targets/*/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
           rm -rf *.manifest
