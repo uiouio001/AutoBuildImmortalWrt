@@ -90,8 +90,6 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     mkdir -p files/etc/openclash/core
     # Download clash core
     echo "👉 Download clash core"
-    #META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
-    #wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta
     # dev内核
     CLASH_DEV_URL="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-arm64.tar.gz"
     wget -qO- $CLASH_DEV_URL | gunzip -c > files/etc/openclash/core/clash
