@@ -198,15 +198,15 @@ jobs:
 
       - name: View disk usage
         if: (!cancelled())
-        run: 
+        run: |
           df -hT
-          df -hT $PWD
       
       - name: Organize firmware files
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          cd /home/build/immortalwrt/bin/targets/*/*
+          #cd /home/build/immortalwrt/bin/targets/*/*
+          cd ${{ github.workspace }}/bin/targets/${{ env.platform }}/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
           rm -rf *.json
