@@ -71,7 +71,10 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo timedatectl set-timezone "$TZ"
+          sudo apt update
+          sudo apt install tzdata
+          #sudo timedatectl set-timezone "$TZ"
+          sudo timedatectl set-timezone Asia/Shanghai
         
       - name: Set executable permissions
         run: |
