@@ -107,7 +107,7 @@ date_version=$(date +"%Y%m%d%H")
 echo $date_version > version
 
 # 设置编译作者信息
-author="OpenWrt"
+author="Uiouio"
 sed -i "s/DISTRIB_DESCRIPTION.*/DISTRIB_DESCRIPTION='%D %V ${date_version} by ${author}'/g" package/base-files/files/etc/openwrt_release
 sed -i "s/OPENWRT_RELEASE.*/OPENWRT_RELEASE=\"%D %V ${date_version} by ${author}\"/g" package/base-files/files/usr/lib/os-release
 
