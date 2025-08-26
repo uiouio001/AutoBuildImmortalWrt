@@ -88,15 +88,34 @@ fi
 if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     echo "✅ 已选择 luci-app-openclash，添加 openclash core"
     mkdir -p files/etc/openclash/core
-    # Download clash_meta
-    META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
-    wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta
-    chmod +x files/etc/openclash/core/clash_meta
+    # Download clash core
+    echo "👉 Download clash core"
+    #META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
+    #wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta
+    # dev内核
+    CLASH_DEV_URL="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-arm64.tar.gz"
+    wget -qO- $CLASH_DEV_URL | gunzip -c > files/etc/openclash/core/clash
+    # premium内核
+    CLASH_TUN_URL="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-arm64-2023.08.17-13-gdcc8d87.gz"
+    wget -qO- $CLASH_TUN_URL | gunzip -c > files/etc/openclash/core/clash_tun
+    # Meta内核版本
+    CLASH_META_URL="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-arm64.tar.gz"
+    wget -qO- $CLASH_META_URL | gunzip -c > files/etc/openclash/core/clash_meta
+    # 给内核赋权
+    chmod +x files/etc/openclash/core/clash*
+    
     # Download GeoIP and GeoSite
-    wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat
-    wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat
-    # Download China IP data
-    wget -q https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country.mmdb -O > files/etc/openclash/Country.mmdb
+    echo "👉 Download GeoIP and GeoSite"
+    GEOIP_URL="https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
+    GEOSITE_URL="https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+    wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
+    wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
+    
+    # Download China IP database
+    echo "👉 Download China IP database"
+    COUNTRY_LITE_URL=https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country-lite.mmdb
+    COUNTRY_FULL_URL=https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country.mmdb
+    wget -qO- $COUNTRY_FULL_URL > files/etc/openclash/Country.mmdb
 else
     echo "⚪️ 未选择 luci-app-openclash"
 fi
@@ -104,7 +123,9 @@ fi
 # 判断是否使用XR30 Led配置文件
 if [ "$USE_XR30_LED_DTS" = "true" ]; then
     cp mediatek-filogic/dtsi/mt7981-cmcc-xr30-emmc.dtsi target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m.dtsi
-    echo "✅ 使用XR30 Led配置文件"
+    echo "✅ 使用XR30Led配置文件"
+else
+    echo "⚪️ 使用默认Led配置文件"
 fi
 
 
