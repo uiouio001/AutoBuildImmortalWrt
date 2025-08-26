@@ -35,12 +35,12 @@ on:
         required: true
         default: "192.168.6.1"
       enable_store:
-        description: "集成 iStore 商店"
+        description: "是否集成 iStore 商店"
         required: false
         type: boolean
         default: true
       include_docker:
-        description: "是否编译 Dockerman 插件"
+        description: "是否编译 Docker 插件"
         required: true
         default: true
         type: boolean
@@ -126,7 +126,8 @@ jobs:
         run: |
           echo "✅ 设置使用XR30的Led配置文件"
       
-      - name: Set WiFi Driver Version
+      - name: Set WiFi Driver Versionmake image PROFILE=$PROFILE PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files"
+
         run: |
           driver_version=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
           driver_firmware=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/.*fw-([0-9]{8}|default).*/\1/g')
@@ -143,125 +144,100 @@ jobs:
           fi
       
       - name: Build Wireless ImmortalWrt 24.10.2
+        id: compile
         run: |
-          profile="${{ github.event.inputs.profile }}"
-          echo "Building for profile: $profile"
-          include_docker="${{ github.event.inputs.include_docker }}"
-          # 默认平台USE_NX30PRO_EEPROM
+          # 默认平台
           echo "platform=mediatek/filogic" >> $GITHUB_ENV
 
-          # 读取 ipq807x 机型文件
-          ipq807x_models=$(cat mediatek-filogic/model/ipq807x.txt | tr '\n' '|')
-          ipq807x_models=${ipq807x_models%|}
-          if [[ "$profile" =~ ^($ipq807x_models)$ ]]; then
-              case_tag="qualcommax-ipq807x-openwrt-24.10.2"
-              case_platform="qualcommax/ipq807x"
-          fi
-
-          # 读取 mt7621 机型文件
-          mt7621_models=$(cat mediatek-filogic/model/mt7621.txt | tr '\n' '|')
-          mt7621_models=${mt7621_models%|}
-          if [[ "$profile" =~ ^($mt7621_models)$ ]]; then
-              case_tag="ramips-mt7621-openwrt-24.10.2"
-              case_platform="ramips/mt7621"
-          fi
-
-          # 读取 bcm53xx/generic 机型文件
-          bcm53xx_models=$(cat mediatek-filogic/model/bcm53xx.txt | tr '\n' '|')
-          bcm53xx_models=${bcm53xx_models%|}
-          if [[ "$profile" =~ ^($bcm53xx_models)$ ]]; then
-              case_tag="bcm53xx-generic-openwrt-24.10.2"
-              case_platform="bcm53xx/generic"
-          fi
+          # 默认分支
+          tag=mediatek-filogic-openwrt-24.10.2
+          branch=24.10.2
 
           # 判断机型
+          echo "Building for profile: $profile"
+          profile="${{ github.event.inputs.profile }}"
           case "$profile" in
-              glinet_gl-b2200)
-                  # 虽然它是高通ipq40xx平台 但由于都是gl机型 故放在一起 找起来方便
-                  tag=ipq40xx-generic-openwrt-24.10.2
-                  echo "platform=ipq40xx/generic" >> $GITHUB_ENV
-                  ;;
-              glinet_gl-axt1800|glinet_gl-ax1800)
-                  # 虽然它是高通ipq60xx平台 但由于都是gl机型 故放在一起 找起来方便
-                  tag=qualcommax-ipq60xx-snapshot
-                  echo "platform=qualcommax/ipq60xx" >> $GITHUB_ENV
-                  ;;
-              cudy_tr3000-256mb-v1)
-                  # 由于256MB版本tr3000 还没有出正式版24.10.2 故使用快照版本来构建
-                  tag=mediatek-filogic-24.10-SNAPSHOT
-                  ;;
               # 下列机型目前没有24.10 因此采用23.05.4分支来构建
               cmcc_rax3000m-emmc-ubootmod | \
-              cmcc_rax3000m-nand-ubootmod | \
-              cmcc_a10 | \
-              abt_asr3000-ubootmod | \
-              imou_lc-hx3001-ubootmod | \
-              jcg_q30 | \
-              jcg_q30-ubootmod | \
-              xiaomi_mi-router-wr30u-112m-nmbm | \
-              cetron_ct3003-stock | \
-              xiaomi_redmi-router-ax6000 | \
-              qihoo_360t7-ubootmod)
-                  tag=mediatek-filogic-openwrt-23.05.4
-                  ls ${{ github.workspace }}/mediatek-filogic/
-                  cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
-                  ;;
+              cmcc_rax3000m-nand-ubootmod)
+                tag=mediatek-filogic-openwrt-23.05.4
+                ls ${{ github.workspace }}/mediatek-filogic/
+                cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
+                ;;
               *)
-                  # 如果前面匹配了 ipq807x、mt7621、bcm53xx 机型文件，则使用对应 tag
-                  if [[ -n "$case_tag" ]]; then
-                      tag=$case_tag
-                      echo "platform=$case_platform" >> $GITHUB_ENV
-                  else
-                      # 默认分支
-                      tag=mediatek-filogic-openwrt-24.10.2
-                  fi
-                  ;;
-            esac
+          esac
+
+          echo "repo_url=https://github.com/immortalwrt/immortalwrt" >> $GITHUB_ENV
+          echo "repo_branch=$branch" >> $GITHUB_ENV
           
-            docker run --rm -i \
-              --user root \
-              -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
-              -v "${{ github.workspace }}/mediatek-filogic/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
-              -v "${{ github.workspace }}/mediatek-filogic/files/etc/config:/home/build/immortalwrt/files/etc/config" \
-              -v "${{ github.workspace }}/arch/arch.conf:/home/build/immortalwrt/files/etc/opkg/arch.conf" \
-              -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
-              -v "${{ github.workspace }}/mediatek-filogic/build24.sh:/home/build/immortalwrt/build.sh" \
-              -e PROFILE=$profile \
-              -e INCLUDE_DOCKER=$include_docker \
-              -e USE_XR30_LED_DTS=${{ github.event.inputs.USE_XR30_LED_DTS }} \
-              -e WIFI_DRIVER_VERSION=${{ env.wifi_driver_version }} \
-              -e WIFI_DRIVER_FIRMWARE=${{ env.wifi_driver_firmware }} \
-              -e USE_NX30PRO_EEPROM=${{ github.event.inputs.USE_NX30PRO_EEPROM }} \
-              -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
-              -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
-              -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
-            immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
+          docker run --rm -i \
+            --user root \
+            -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
+            -v "${{ github.workspace }}/mediatek-filogic/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
+            -v "${{ github.workspace }}/mediatek-filogic/files/etc/config:/home/build/immortalwrt/files/etc/config" \
+            -v "${{ github.workspace }}/arch/arch.conf:/home/build/immortalwrt/files/etc/opkg/arch.conf" \
+            -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
+            -v "${{ github.workspace }}/mediatek-filogic/build24.sh:/home/build/immortalwrt/build.sh" \
+            -e PROFILE=$profile \
+            -e INCLUDE_DOCKER=${{ github.event.inputs.include_docker }} \
+            -e USE_XR30_LED_DTS=${{ github.event.inputs.USE_XR30_LED_DTS }} \
+            -e WIFI_DRIVER_VERSION=${{ env.wifi_driver_version }} \
+            -e WIFI_DRIVER_FIRMWARE=${{ env.wifi_driver_firmware }} \
+            -e USE_NX30PRO_EEPROM=${{ github.event.inputs.USE_NX30PRO_EEPROM }} \
+            -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
+            -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
+            -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
+          immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
+
+          echo "status=success" >> $GITHUB_OUTPUT
+        
+      - name: 发布阶段：整理固件文件
+        id: organize
+        if: steps.compile.outputs.status == 'success' && !cancelled()
+        run: | 
+          mapfile -t devices < <(grep '^CONFIG_TARGET_DEVICE.*=y' openwrt/.config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+          cd ${{ github.workspace }}/bin/targets//*/*
+          rm -rf *.buildinfo
+          rm -rf *.compilejson
+          rm -rf *.manifest
+          rm -rf packages
+
+          echo "status=success" >> $GITHUB_OUTPUT
       
-      - name: Create info
-        run: |
-          cat > ${{ github.workspace }}/router-info.md <<EOF
-          ## 📡 路由器后台信息
-
-          - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}
-          - 👤 **用户名**: root
-          - 🔑 **密码**: 无
-          EOF
-
-          if [ "${{ github.event.inputs.include_docker }}" == "true" ]; then
-            extra_content="#### 默认带docker"
-            echo -e "\n$extra_content" >> ${{ github.workspace }}/router-info.md
+      - name: Create release tag
+        id: tag
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        run: |          
+          touch ${{ github.workspace }}/release.txt
+          echo "- 💻 CPU架构: aarch64_cortex-a53" >> release.txt
+          echo "- 📂 使用源码：${{ env.repo_url }}" >> release.txt
+          echo "- 🌳 使用分支：${{ env.repo_branch }}" >> release.txt
+          echo "- ⏱️ 构建时间: $release_date" >> release.txt
+          echo "- 🏠 登录地址: http://${{ env.IP_ADDR }} or http://immortalwrt.lan" >> release.txt
+          echo "- 👤 用户名: root" >> release.txt
+          echo "- 🔒 密码: none" >> release.txt
+          echo "- 📒 说明: " >> release.txt
+          if [ "${{ github.event.inputs.enable_store }}" == "true" ]; then
+                  echo "- ✅ 已构建iStroe商店" >> release.txt
           else
-            echo -e "\n#### 不带docker" >> ${{ github.workspace }}/router-info.md
+                  echo "- ⚪️ 未构建iStroe商店" >> release.txt
           fi
-          
-          echo "release_tag=${{ github.event.inputs.profile }}-$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-          
+          if [ "${{ github.event.inputs.include_docker }}" == "true" ]; then
+                  echo "- ✅ 已构建Docker" >> release.txt
+          else
+                  echo "- ⚪️ 未构建Docker" >> release.txt
+          fi
+
+          echo "release_tag=${{ github.event.inputs.profile }}-$release_date" >> $GITHUB_OUTPUT
+          echo "status=success" >> ${GITHUB_OUTPUT}
+
       - name: Upload ImmortalWrt as release assets
         uses: softprops/action-gh-release@v2.2.1
+        if: steps.tag.outputs.status == 'success' && !cancelled()
         with:
-          tag_name: ${{ env.release_tag }}
           name: ImmortalWrt-Wireless
-          body_path: ${{ github.workspace }}/router-info.md
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          body_path: ${{ github.workspace }}/realease.txt
           files: |
             ${{ github.workspace }}/bin/targets/${{ env.platform }}/*
           token: ${{ secrets.GITHUB_TOKEN }}
