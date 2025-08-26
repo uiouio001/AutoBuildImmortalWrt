@@ -69,7 +69,6 @@ jobs:
 
       - name: Set executable permissions
         run: |
-          sudo chown $USER:$GROUPS ${{ github.workspace }}
           chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
       
       - name: Save Custom Router IP into OpenWrt files
@@ -165,7 +164,8 @@ jobs:
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          sudo chown $USER:$GROUPS ${{ github.workspace }}/bin/targets
+          sudo chown -R $USER:$GROUPS ${{ github.workspace }}
+          sudo chown -R $USER:$GROUPS ${{ github.workspace }}/bin/targets
           cd ${{ github.workspace }}/bin/targets/*/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
