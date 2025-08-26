@@ -37,31 +37,6 @@ on:
         required: true
         default: false
         type: boolean
-      WIFI_DRIVER_VERSION:
-        description: "选择WiFi驱动版本"
-        required: true
-        default: 'v7.6.7.2-fw-20240823(recommend)'
-        type: choice
-        options:
-        - v7.6.7.2-fw-20240823(recommend)
-        - v7.6.6.1-fw-20230306(recommend)
-        - v7.6.7.2-fw-default
-        - v7.6.7.2-fw-20230306
-        - v7.6.7.2-fw-20230330
-        - v7.6.7.2-fw-20230411
-        - v7.6.7.2-fw-20230717
-        - v7.6.7.2-fw-20231024
-        - v7.6.6.1-fw-default
-        - v7.6.6.1-fw-20230330
-        - v7.6.6.1-fw-20230411
-        - v7.6.6.1-fw-20230717
-        - v7.6.6.1-fw-20231024
-        - v7.6.6.1-fw-20240823
-      USE_NX30PRO_EEPROM:
-        description: "使用nx30pro高功能eeprom提高信号强度"
-        required: true
-        default: false
-        type: boolean
       SSH_TO_GITHUB_ACTIONS:
         description: "SSH connection to Actions"
         required: false
@@ -123,23 +98,6 @@ jobs:
         run: |
           echo "✅ 设置使用XR30的Led配置文件"
       
-      - name: Set WiFi Driver Version
-
-        run: |
-          driver_version=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-          driver_firmware=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/.*fw-([0-9]{8}|default).*/\1/g')
-          echo "wifi_driver_version=$driver_version" >> $GITHUB_ENV
-          echo "wifi_driver_firmware=$driver_firmware" >> $GITHUB_ENV
-          echo "✅ 您选择的WiFi驱动版本是: $driver_version-fw-$driver_firmware"
- 
-      - name: Use nx30pro eeprom and fixed WiFi MAC address
-        run: |
-          if [ "${{ github.event.inputs.USE_NX30PRO_EEPROM }}" == "true" ]; then
-            echo "✅ 使用nx30pro的高功率eeprom(2.4G是23dBm、5G是22dBm)"
-          else
-            echo "❎ 使用默认功率eeprom(2.4G是25dBm、5G是24dBm)"
-          fi
-      
       - name: Build Wireless ImmortalWrt 24.10.2
         id: compile
         run: |
@@ -178,9 +136,6 @@ jobs:
             -e PROFILE=$profile \
             -e INCLUDE_DOCKER=${{ github.event.inputs.include_docker }} \
             -e USE_XR30_LED_DTS=${{ github.event.inputs.USE_XR30_LED_DTS }} \
-            -e WIFI_DRIVER_VERSION=${{ env.wifi_driver_version }} \
-            -e WIFI_DRIVER_FIRMWARE=${{ env.wifi_driver_firmware }} \
-            -e USE_NX30PRO_EEPROM=${{ github.event.inputs.USE_NX30PRO_EEPROM }} \
             -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
             -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
             -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
