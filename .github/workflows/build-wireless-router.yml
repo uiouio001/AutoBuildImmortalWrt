@@ -63,7 +63,7 @@ on:
         default: false
         type: boolean
       SSH_TO_GITHUB_ACTIONS:
-        description: 'SSH connection to Actions'
+        description: "SSH connection to Actions"
         required: false
         default: false
         type: boolean
