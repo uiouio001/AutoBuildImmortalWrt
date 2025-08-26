@@ -85,6 +85,8 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     # Download GeoIP and GeoSite
     wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat
     wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat
+    # Download China IP data
+    wget -q https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country.mmdb -O > files/etc/openclash/Country.mmdb
 else
     echo "⚪️ 未选择 luci-app-openclash"
 fi
