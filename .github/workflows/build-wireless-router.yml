@@ -69,7 +69,9 @@ jobs:
 
       - name: Set executable permissions
         run: |
-          chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
+          sudo chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
+          sudo chown -R $USER:$GROUPS ${{ github.workspace }}
+          sudo timedatectl set-timezone "$TZ"
       
       - name: Save Custom Router IP into OpenWrt files
         run: |
@@ -209,7 +211,7 @@ jobs:
         with:
           name: ImmortalWrt-Wireless
           tag_name: ${{ steps.tag.outputs.release_tag }}
-          body_path: ${{ github.workspace }}/realease.txt
+          body_path: ${{ github.workspace }}/release.txt
           files: ${{ env.firmware_dir }}/*
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
