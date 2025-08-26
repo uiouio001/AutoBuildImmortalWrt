@@ -102,17 +102,19 @@ uci delete ttyd.@ttyd[0].interface
 uci set dropbear.@dropbear[0].Interface=''
 uci commit
 
+# 修改版本为编译日期，数字类型。
+date_version=$(date +"%Y%m%d%H")
+echo $date_version > version
+
+# 设置编译作者信息
+author="OpenWrt"
+sed -i "s/DISTRIB_DESCRIPTION.*/DISTRIB_DESCRIPTION='%D %V ${date_version} by ${author}'/g" package/base-files/files/etc/openwrt_release
+sed -i "s/OPENWRT_RELEASE.*/OPENWRT_RELEASE=\"%D %V ${date_version} by ${author}\"/g" package/base-files/files/usr/lib/os-release
+
 # 设置编译作者信息
 #FILE_PATH="/etc/openwrt_release"
 #NEW_DESCRIPTION="Packaged by wukongdaily"
 #sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
-
-# 若luci-app-advancedplus (进阶设置)已安装 则去除zsh的调用 防止命令行报 /usb/bin/zsh: not found的提示
-if opkg list-installed | grep -q '^luci-app-advancedplus '; then
-    sed -i '/custom\/usr\/bin\/zsh/d' /etc/profile
-    sed -i '/\/bin\/zsh/d' /etc/init.d/advancedplus
-    sed -i '/\/usr\/bin\/zsh/d' /etc/init.d/advancedplus
-fi
 
 # 设置时区
 echo "✅ Set Timezone: Asia\/Shanghai"
@@ -120,5 +122,12 @@ sed -i "s/'UTC'/'CST-8'\n   set system.@system[-1].zonename='Asia\/Shanghai'/g" 
 sed -i 's/time1\.apple\.com/ntp\.ntsc\.ac\.cn/g' package/base-files/files/bin/config_generate
 sed -i 's/time1\.google\.com/ntp\.tencent\.com/g' package/base-files/files/bin/config_generate
 sed -i 's/time\.cloudflare\.com/ntp1\.aliyun\.com/g' package/base-files/files/bin/config_generate
+
+# 若luci-app-advancedplus (进阶设置)已安装 则去除zsh的调用 防止命令行报 /usb/bin/zsh: not found的提示
+if opkg list-installed | grep -q '^luci-app-advancedplus '; then
+    sed -i '/custom\/usr\/bin\/zsh/d' /etc/profile
+    sed -i '/\/bin\/zsh/d' /etc/init.d/advancedplus
+    sed -i '/\/usr\/bin\/zsh/d' /etc/init.d/advancedplus
+fi
 
 exit 0
