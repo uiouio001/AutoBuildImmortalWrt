@@ -108,29 +108,6 @@ if [ "$USE_XR30_LED_DTS" = "true" ]; then
 fi
 
 
-# 设置WiFi驱动版本，默认为v7.6.6.2
-if [ "$WIFI_DRIVER_VERSION" == "v7.6.6.1" ]; then
-  sed -i 's/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7672=y/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7661=y/g' .config
-fi
-if [ "$WIFI_DRIVER_FIRMWARE" == "default" ]; then
-  sed -i 's/CONFIG_MTK_MT_WIFI_MT7981_20240823=y/CONFIG_MTK_MT_WIFI_MT7981_DEFAULT_FIRMWARE=y/g' .config
-else
-  sed -i 's/CONFIG_MTK_MT_WIFI_MT7981_20240823=y/CONFIG_MTK_MT_WIFI_MT7981_${firmware}=y/g' .config
-fi
-
-
-###############################################################
-if [ "$USE_NX30PRO_EEPROM" == "default" ]; then
-  echo "✅ 使用nx30pro的高功率eeprom"
-  mkdir target/linux/mediatek/mt7981/base-files/lib/firmware
-  cp mediatek-filogic/eeprom/nx30pro_eeprom.bin target/linux/mediatek/mt7981/base-files/lib/firmware/MT7981_iPAiLNA_EEPROM.bin
-  sed -i 's/caldata_extract_mmc/# caldata_extract_mmc/' target/linux/mediatek/mt7981/base-files/lib/preinit/90_extract_caldata
-  sed -i 's#./files/mt7981-default-eeprom/MT7981_iPAiLNA_EEPROM.bin##' package/mtk/drivers/mt_wifi/Makefile
-
-fi
-###############################################################
-
-
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
