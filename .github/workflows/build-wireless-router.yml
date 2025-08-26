@@ -195,19 +195,18 @@ jobs:
 
           echo "build_date=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: View disk usage
+        if: (!cancelled())
+        run: 
+          df -hT
+          df -hT $PWD
       
-      - name: Upload bin dir to Actions Artifacts
-        uses: actions/upload-artifact@main
-        if: steps.compile.outputs.status == 'success'&& !cancelled()
-        with:
-          name: OpenWrt_bin${{ env.build_date }}
-          path: openwrt/bin
-      
-      - name: 发布阶段：整理固件文件
+      - name: Organize firmware files
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          cd openwrt/bin/targets/*/*
+          cd /home/build/immortalwrt/bin/targets/*/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
           rm -rf *.json
