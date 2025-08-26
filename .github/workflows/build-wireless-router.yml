@@ -67,11 +67,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: 初始化阶段：设置编译环境
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo timedatectl set-timezone "$TZ"
+        
       - name: Set executable permissions
         run: |
           sudo chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
           sudo chown -R $USER:$GROUPS ${{ github.workspace }}
-          sudo timedatectl set-timezone "$TZ"
       
       - name: Save Custom Router IP into OpenWrt files
         run: |
