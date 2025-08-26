@@ -164,7 +164,6 @@ jobs:
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          sudo chown -R $USER:$GROUPS ${{ github.workspace }}
           sudo chown -R $USER:$GROUPS ${{ github.workspace }}/bin/targets
           cd ${{ github.workspace }}/bin/targets/*/*
           rm -rf *.buildinfo
@@ -185,7 +184,7 @@ jobs:
           echo "- 💻 CPU架构: aarch64_cortex-a53" >> release.txt
           echo "- 📂 使用源码：${{ env.repo_url }}" >> release.txt
           echo "- 🌳 使用分支：${{ env.repo_branch }}" >> release.txt
-          echo "- ⏱️ 构建时间: ${{ env.build_date }}"" >> release.txt
+          echo "- ⏱️ 构建时间: ${{ env.build_date }}" >> release.txt
           echo "- 🏠 登录地址: http://${{ github.event.inputs.custom_router_ip }} or http://immortalwrt.lan" >> release.txt
           echo "- 👤 用户名: root" >> release.txt
           echo "- 🔒 密码: none" >> release.txt
@@ -196,9 +195,9 @@ jobs:
                   echo "- ⚪️ 未构建iStroe商店" >> release.txt
           fi
           if [ "${{ github.event.inputs.include_docker }}" == "true" ]; then
-                  echo "- ✅ 已构建Docker" >> release.txt
+                  echo "- ✅ 已编译Docker插件" >> release.txt
           else
-                  echo "- ⚪️ 未构建Docker" >> release.txt
+                  echo "- ⚪️ 未编译Docker插件" >> release.txt
           fi
 
           echo "release_tag=${{ github.event.inputs.profile }}-${{ env.build_date }}" >> $GITHUB_OUTPUT
