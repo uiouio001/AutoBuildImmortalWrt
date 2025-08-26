@@ -193,19 +193,29 @@ jobs:
             -e PPPOE_PASSWORD=${{ github.event.inputs.pppoe_password }} \
           immortalwrt/imagebuilder:$tag /bin/bash /home/build/immortalwrt/build.sh
 
+          echo "build_date=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
-        
+      
+      - name: Upload bin dir to Actions Artifacts
+        uses: actions/upload-artifact@main
+        if: steps.compile.outputs.status == 'success'&& !cancelled()
+        with:
+          name: OpenWrt_bin${{ env.build_date }}
+          path: openwrt/bin
+      
       - name: 发布阶段：整理固件文件
         id: organize
         if: steps.compile.outputs.status == 'success' && !cancelled()
         run: | 
-          mapfile -t devices < <(grep '^CONFIG_TARGET_DEVICE.*=y' openwrt/.config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-          cd ${{ github.workspace }}/bin/targets/*/*
+          cd openwrt/bin/targets/*/*
           rm -rf *.buildinfo
           rm -rf *.compilejson
+          rm -rf *.json
           rm -rf *.manifest
           rm -rf packages
 
+          # 使用整理后的文件进行发布，代替${{ github.workspace }}/bin/targets/${{ env.platform }}/*
+          echo "firmware_dir=$PWD" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
       
       - name: Create release tag
@@ -216,8 +226,8 @@ jobs:
           echo "- 💻 CPU架构: aarch64_cortex-a53" >> release.txt
           echo "- 📂 使用源码：${{ env.repo_url }}" >> release.txt
           echo "- 🌳 使用分支：${{ env.repo_branch }}" >> release.txt
-          echo "- ⏱️ 构建时间: $release_date" >> release.txt
-          echo "- 🏠 登录地址: http://${{ env.IP_ADDR }} or http://immortalwrt.lan" >> release.txt
+          echo "- ⏱️ 构建时间: ${{ env.build_date }}"" >> release.txt
+          echo "- 🏠 登录地址: http://${{ github.event.inputs.custom_router_ip }} or http://immortalwrt.lan" >> release.txt
           echo "- 👤 用户名: root" >> release.txt
           echo "- 🔒 密码: none" >> release.txt
           echo "- 📒 说明: " >> release.txt
@@ -242,8 +252,7 @@ jobs:
           name: ImmortalWrt-Wireless
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: ${{ github.workspace }}/realease.txt
-          files: |
-            ${{ github.workspace }}/bin/targets/${{ env.platform }}/*
+          files: ${{ env.firmware_dir }}/*
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
