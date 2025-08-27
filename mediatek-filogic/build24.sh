@@ -89,15 +89,10 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     echo "✅ 已选择 luci-app-openclash，添加 openclash core"
     mkdir -p files/etc/openclash/core
     # Download clash core
-    echo "👉 Download clash core"
-    # dev内核
-    #CLASH_DEV_URL="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-arm64.tar.gz"
-    #wget -qO- $CLASH_DEV_URL | gunzip -c > files/etc/openclash/core/clash
-    # premium内核
-    #CLASH_TUN_URL="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-arm64-2023.08.17-13-gdcc8d87.gz"
-    #wget -qO- $CLASH_TUN_URL | gunzip -c > files/etc/openclash/core/clash_tun
+    echo "👉 Download clash meta"
     # Meta内核版本
-    CLASH_META_URL="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-arm64.tar.gz"
+    #CLASH_META_URL="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-arm64.tar.gz"
+    CLASH_META_URL="https://github.com/MetaCubeX/mihomo/releases/download/v1.19.13/mihomo-linux-arm64-v1.19.13.gz"
     wget -qO- $CLASH_META_URL | gunzip -c > files/etc/openclash/core/clash_meta
     # 给内核赋权
     chmod +x files/etc/openclash/core/clash*
