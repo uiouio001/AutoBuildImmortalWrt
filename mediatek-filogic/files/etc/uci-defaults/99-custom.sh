@@ -102,6 +102,13 @@ uci delete ttyd.@ttyd[0].interface
 uci set dropbear.@dropbear[0].Interface=''
 uci commit
 
+# 更换软件源
+sed -i '/modem/d' /etc/opkg/distfeeds.conf
+sed -i 's#downloads.immortalwrt.org#mirrors.aliyun.com/immortalwrt#g' /etc/opkg/distfeeds.conf
+sed -i '$a src/gz kmods https://mirrors.aliyun.com/immortalwrt/releases/24.10.2/targets/mediatek/filogic/kmods/6.6.93-1-6a9e125268c43e0bae8cecb014c8ab03' /etc/opkg/distfeeds.conf
+# 设置为不检查签名
+#sed -ri '/check_signature/s@^[^#]@#&@' /etc/opkg.conf
+
 # 修改版本为编译日期，数字类型。
 date_version=$(date +"%Y%m%d%H")
 echo $date_version > version
