@@ -131,7 +131,7 @@ jobs:
               *)
           esac
 
-          echo "repo_url=https://github.com/immortalwrt/immortalwrt" >> $GITHUB_ENV
+          echo "repo_url=https://downloads.immortalwrt.org/releases/" >> $GITHUB_ENV
           echo "repo_branch=$branch" >> $GITHUB_ENV
           
           docker run --rm -i \
