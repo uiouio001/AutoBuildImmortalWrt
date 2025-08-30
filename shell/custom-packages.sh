@@ -13,7 +13,8 @@ CUSTOM_PACKAGES="$PACKAGES luci-app-openclash"
 # 通用即插即用UPnP（端口自动转发）
 CUSTOM_PACKAGES="$PACKAGES luci-app-upnp luci-i18n-upnp-zh-cn"
 # 动态DNS
-CUSTOM_PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3"
+CUSTOM_PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn"
+CUSTOM_PACKAGES="$PACKAGES ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3 ddns-scripts-cloudflare"
 # SOCAT
 CUSTOM_PACKAGES="$PACKAGES luci-app-socat luci-i18n-socat-zh-cn"
 # 去广告adghome
