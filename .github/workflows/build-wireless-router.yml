@@ -21,7 +21,7 @@ on:
       custom_router_ip:
         description: "请设置路由器的管理地址 格式:192.168.x.1 或 10.x.x.1"
         required: true
-        default: "192.168.6.1"
+        default: "192.168.100.1"
       enable_store:
         description: "是否集成 iStore 商店"
         required: false
