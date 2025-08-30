@@ -2,6 +2,8 @@
 source shell/custom-packages.sh
 # 该文件实际为imagebuilder容器内的build.sh
 
+echo "✅ 编译固件大小为: $ROOTFS_PARTSIZE MB"
+
 if [ -n "$CUSTOM_PACKAGES" ]; then
   echo "✅ 你选择了第三方软件包：$CUSTOM_PACKAGES"
     # 下载 run 文件仓库
@@ -124,7 +126,7 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-make image PROFILE=$PROFILE PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files"
+make image PROFILE=$PROFILE PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
 
 if [ $? -ne 0 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Build failed!"
