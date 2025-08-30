@@ -21,7 +21,7 @@ on:
       rootfs_partsize:
         description: '请输入要编译固件大小 单位(MB)'
         required: true
-        default: '2048'
+        default: '1024'
       custom_router_ip:
         description: "请设置路由器的管理地址 格式:192.168.x.1 或 10.x.x.1"
         required: true
@@ -85,7 +85,7 @@ jobs:
           sudo chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
           sudo chown -R $USER:$GROUPS ${{ github.workspace }}
 
-      - name: Set Rootfs Part Size (default 2048MB)
+      - name: Set Rootfs Part Size (default 1024MB)
         run: |
           echo "Set Rootfs Part Size: ${{ github.event.inputs.rootfs_partsize }} MB"
         
