@@ -10,8 +10,8 @@
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-quickstart-zh-cn"
 # OpenClash
 CUSTOM_PACKAGES="$PACKAGES luci-app-openclash"
-# UPNP
-CUSTOM_PACKAGES="$PACKAGES luci-app-upnp"
+# 通用即插即用UPnP（端口自动转发）
+CUSTOM_PACKAGES="$PACKAGES luci-app-upnp luci-i18n-upnp-zh-cn"
 # 动态DNS
 CUSTOM_PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3"
 # SOCAT
