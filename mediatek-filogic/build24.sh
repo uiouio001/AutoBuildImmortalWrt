@@ -52,7 +52,6 @@ PACKAGES="$PACKAGES luci-theme-argon"
 PACKAGES="$PACKAGES luci-app-argon-config"
 #PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
 #PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-wol-zh-cn"
 #24.10.0
 PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-ttyd-zh-cn"
@@ -61,16 +60,6 @@ PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
 # 静态文件服务器dufs(推荐)
 # PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
-# OpenClash
-PACKAGES="$PACKAGES luci-app-openclash"
-# IPV6
-PACKAGES="$PACKAGES luci-proto-ipv6"
-# UPNP
-PACKAGES="$PACKAGES luci-app-upnp"
-# 动态DNS
-PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3"
-# SOCAT
-PACKAGES="$PACKAGES luci-app-socat luci-i18n-socat-zh-cn"
 # 增加几个必备组件 方便用户安装iStore
 PACKAGES="$PACKAGES fdisk"
 PACKAGES="$PACKAGES sgdisk"
