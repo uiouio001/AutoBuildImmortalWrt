@@ -50,8 +50,8 @@ PACKAGES="$PACKAGES curl luci luci-i18n-base-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
 PACKAGES="$PACKAGES luci-theme-argon"
 PACKAGES="$PACKAGES luci-app-argon-config"
-PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
+#PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
+#PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-wol-zh-cn"
 #24.10.0
 PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
@@ -63,8 +63,17 @@ PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
 # PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
 # OpenClash
 PACKAGES="$PACKAGES luci-app-openclash"
+# IPV6
+PACKAGES="$PACKAGES luci-proto-ipv6"
+# UPNP
+PACKAGES="$PACKAGES luci-app-upnp"
+# 动态DNS
+PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3"
+# SOCAT
+PACKAGES="$PACKAGES luci-app-socat luci-i18n-socat-zh-cn"
 # 增加几个必备组件 方便用户安装iStore
 PACKAGES="$PACKAGES fdisk"
+PACKAGES="$PACKAGES sgdisk"
 PACKAGES="$PACKAGES script-utils"
 PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
 
@@ -92,7 +101,6 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     # Download clash core
     echo "👉 Download clash meta"
     # Meta内核版本
-    #CLASH_META_URL="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-arm64.tar.gz"
     CLASH_META_URL="https://github.com/MetaCubeX/mihomo/releases/download/v1.19.13/mihomo-linux-arm64-v1.19.13.gz"
     wget -qO- $CLASH_META_URL | gunzip -c > files/etc/openclash/core/clash_meta
     # 给内核赋权
