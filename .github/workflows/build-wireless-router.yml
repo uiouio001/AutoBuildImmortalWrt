@@ -18,6 +18,10 @@ on:
           - cmcc_rax3000m-nand-ubootmod
           - cmcc_rax3000me
         default: cmcc_rax3000m
+      rootfs_partsize:
+        description: '请输入要编译固件大小 单位(MB)'
+        required: true
+        default: '2048'
       custom_router_ip:
         description: "请设置路由器的管理地址 格式:192.168.x.1 或 10.x.x.1"
         required: true
@@ -80,7 +84,11 @@ jobs:
         run: |
           sudo chmod +x ${{ github.workspace }}/mediatek-filogic/build24.sh
           sudo chown -R $USER:$GROUPS ${{ github.workspace }}
-      
+
+      - name: Set Rootfs Part Size (default 2048MB)
+        run: |
+          echo "Set Rootfs Part Size: ${{ github.event.inputs.rootfs_partsize }} MB"
+        
       - name: Save Custom Router IP into OpenWrt files
         run: |
           mkdir -p "${{ github.workspace }}/custom"
@@ -143,6 +151,7 @@ jobs:
             -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
             -v "${{ github.workspace }}/mediatek-filogic/build24.sh:/home/build/immortalwrt/build.sh" \
             -e PROFILE=$profile \
+            -e ROOTFS_PARTSIZE=$rootfs_partsize \
             -e INCLUDE_DOCKER=${{ github.event.inputs.include_docker }} \
             -e USE_XR30_LED_DTS=${{ github.event.inputs.USE_XR30_LED_DTS }} \
             -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
