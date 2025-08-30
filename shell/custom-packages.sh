@@ -8,6 +8,14 @@
 
 # 首页和网络向导
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-quickstart-zh-cn"
+# OpenClash
+CUSTOM_PACKAGES="$PACKAGES luci-app-openclash"
+# UPNP
+CUSTOM_PACKAGES="$PACKAGES luci-app-upnp"
+# 动态DNS
+CUSTOM_PACKAGES="$PACKAGES luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services ddns-scripts-dnspod-v3"
+# SOCAT
+CUSTOM_PACKAGES="$PACKAGES luci-app-socat luci-i18n-socat-zh-cn"
 # 去广告adghome
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-adguardhome"
 # 代理相关
@@ -21,6 +29,8 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-i18n-quickstart-zh-cn"
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES -luci-i18n-homeproxy-zh-cn"
 # VPN
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-tailscale luci-i18n-tailscale-zh-cn"
+# 远程唤醒
+CUSTOM_PACKAGES="$PACKAGES luci-i18n-wol-zh-cn"
 # 分区扩容 by sirpdboy 
 # CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-partexp luci-i18n-partexp-zh-cn"
 # 酷猫主题 by sirpdboy 
